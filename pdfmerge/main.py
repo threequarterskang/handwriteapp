@@ -16,19 +16,6 @@ PDF_DIRECTORY = "./pdf/"
 folder = Path("./config")
 svg_path = "./svgoutput"
 
-CHAR_MAP = {
-    ",": "COMMA",
-    '"': "QUOTE",
-    "/": "SLASH",
-    "\\": "BACKSLASH",
-    ":": "COLON",
-    "*": "STAR",
-    "?": "Q",
-    "<": "LT",
-    ">": "GT",
-    "|": "PIPE"
-}
-
 def find_field_index_by_key(fields, key_name, value):
     for i , field in enumerate(fields):
         if field.get(key_name) == value:
@@ -101,11 +88,10 @@ def main():
                     svgrender = svg_engine.render_page(result, index, template)   
                     render = svg_engine.save_svg(svgrender, f'output{tbn}{idx}.svg')
 
-                for row1 in result:
-                    print(row1)
-
-                for row3 in svgrender:
-                    print(row3)                
+                    print(f'{tbn}-{idx}')
+                    for row1 in result:
+                        print(row1)
+                             
     
     conn1.close()
     conn2.close()

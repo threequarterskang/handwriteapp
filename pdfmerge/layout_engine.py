@@ -25,6 +25,8 @@ class LayoutEngine:
 
         baseline = self.font_engine.meta.get("baseline", 0)
 
+        print(baseline)
+
         placed = []
         result = []
 
