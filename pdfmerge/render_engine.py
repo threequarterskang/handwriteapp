@@ -34,8 +34,24 @@ class SVGRenderer:
     # -----------------------------
     # 3️⃣ 渲染单页
     # -----------------------------
-    def render_page(self, layout_items):
-        svg = ET.Element("svg", xmlns="http://www.w3.org/2000/svg")
+    def render_page(self, layout_items, index, valueconfig):
+        fields = valueconfig.get("fields")
+
+        x0 = fields[index]["blankbbox"][0]
+        y0 = fields[index]["blankbbox"][1]
+        x1 = fields[index]["blankbbox"][2]
+        y1 = fields[index]["blankbbox"][3]
+
+        max_width = x1 - x0
+        max_height = y1 - y0
+
+        svg = ET.Element(
+            "svg", 
+            xmlns="http://www.w3.org/2000/svg",
+            width=str(max_width),
+            height=str(max_height),
+            viewBox=f"{x0} {y0} {max_width} {max_height}"
+            )
 
         for item in layout_items:
             glyph = self.load_glyph(item["file"])

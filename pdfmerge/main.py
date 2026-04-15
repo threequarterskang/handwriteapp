@@ -29,6 +29,12 @@ CHAR_MAP = {
     "|": "PIPE"
 }
 
+def find_field_index_by_key(fields, key_name, value):
+    for i , field in enumerate(fields):
+        if field.get(key_name) == value:
+            return i
+    return -1
+
 def main():
     with open("svgfong.json", "r", encoding="utf-8") as f:
         font_map = json.load(f)
@@ -76,6 +82,7 @@ def main():
                     with open(filename, "r", encoding="utf-8") as ftemplate:
                         template = json.load(ftemplate)
 
+            fields = template.get("fields")
             row = cur1.fetchone()
             max_column = int(mapping[tbn])
             for idx in range(1,max_column+1):
@@ -89,9 +96,11 @@ def main():
                 if text is None:
                     print(f'{column_name} is none..')
                 else:
-                    result = layout_engine.layout(text, template)
-                    svgrender = svg_engine.render_page(result)   
+                    index = find_field_index_by_key(fields, f"key", idx)
+                    result = layout_engine.layout(text, index, template)
+                    svgrender = svg_engine.render_page(result, index, template)   
                     render = svg_engine.save_svg(svgrender, f'output{tbn}{idx}.svg')
+
                 for row1 in result:
                     print(row1)
 

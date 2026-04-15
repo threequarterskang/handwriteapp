@@ -10,15 +10,15 @@ class LayoutEngine:
     def __init__(self, font_engine):
         self.font_engine = font_engine
 
-    def layout(self, text, config):
+    def layout(self, text, index, config):
         fields = config.get("fields")
         if not fields:
             raise ValueError("missing fields!!")
 
-        x0 = fields[0]["blankbbox"][0]
-        y0 = fields[0]["blankbbox"][1]
-        x1 = fields[0]["blankbbox"][2]
-        y1 = fields[0]["blankbbox"][3]
+        x0 = fields[index]["blankbbox"][0]
+        y0 = fields[index]["blankbbox"][1]
+        x1 = fields[index]["blankbbox"][2]
+        y1 = fields[index]["blankbbox"][3]
 
         max_width = x1 - x0
         max_height = y1 - y0
