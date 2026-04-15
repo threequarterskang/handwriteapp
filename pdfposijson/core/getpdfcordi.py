@@ -139,7 +139,7 @@ def largest_rectangle(binary):
                     best_rect = (x, y, w_rect, h_rect)
     return best_rect
 
-def pdf_to_img_cordinate(page, x0, y0, zoom=2):
+def pdf_to_img_cordinate(page, x0, y0, zoom=1):
 #   pdf_x0 = marker["rect"][0]
 #   pdf_y1 = marker["rect"][3]      when use the left-bottom as origin ,y1 should be used.
 #   pdf_y0 = marker["rect"][1]
@@ -152,7 +152,7 @@ def pdf_to_img_cordinate(page, x0, y0, zoom=2):
 
     return img_x, img_y
 
-def find_local_blank(binary, start_x, start_y, roi_width=600, roi_height=400):
+def find_local_blank(binary, start_x, start_y, roi_width=60, roi_height=180):
     h, w = binary.shape
     
     x_end = min(start_x + roi_width, w)

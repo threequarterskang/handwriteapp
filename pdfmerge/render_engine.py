@@ -50,15 +50,15 @@ class SVGRenderer:
             xmlns="http://www.w3.org/2000/svg",
             width=str(max_width),
             height=str(max_height),
-            viewBox=f"{x0} {y0} {max_width} {max_height}"
+            viewBox=f"0 0 {max_width} {max_height}"
             )
 
         for item in layout_items:
             glyph = self.load_glyph(item["file"])
 
             # 🔥 坐标修正
-            x = item["x"]
-            y = item["y"]
+            x = item["x"]-x0
+            y = item["y"]-y0
             #y = self.convert_y(item["y"])
 
             scale = item.get("scale", 1.0)
