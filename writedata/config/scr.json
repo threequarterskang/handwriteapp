@@ -1,0 +1,31 @@
+{
+  "type": "field_driven_sample_plan",
+  "description": "SCR.mod",
+
+  "source_db": "placeholder.db",
+  "lookup_table": "field_rule",
+  "key_column": "英文名字",
+
+  "inspect_result_value": "符合要求",
+  "sample_strategy": "gb2828_SCR",
+  "fail_result_num": "0",
+
+  "rules": [
+    {
+      "stage": "base",
+      "when": "always_true()",
+      "then": {
+        "{15}": "random_range(18, 22, 1, 'Ω')",
+        "{16}": "'不导通'"
+      }
+    },
+    {
+      "stage": "series",
+      "when": "always_true()",
+      "then": {
+        "{33}": "'G-K 两极间电阻(Ω)'",
+        "{23}_series": "generate_scr_series({23}, {15}, 34, 40)"
+      }
+    }
+  ]
+}

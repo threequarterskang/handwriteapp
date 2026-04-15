@@ -1,0 +1,32 @@
+{
+  "type": "field_driven_sample_plan",
+  "description": "BAT.mod",
+
+  "source_db": "placeholder.db",
+  "lookup_table": "field_rule",
+  "key_column": "英文名字",
+
+  "inspect_result_value": "符合要求",
+  "sample_strategy": "gb2828_BAT",
+  "fail_result_num": "0",
+
+  "rules": [
+    {
+      "stage": "base",
+      "when": "always_true()", 
+      "then": {
+        "{15}": "concat(get_number('(', {9}), '-2', '~', get_number({9}), '-1', ')', 'mΩ')",
+        "{16}": "random_range_with_suffix({13},{13.1},{13.2},{13.3}, 'DCV')"
+      }
+    },
+    {
+      "stage": "series",
+      "when": "always_true()", 
+      "then": {
+        "{31}": "'内阻(mΩ)'",
+        "{37}": "'开路电压(DCV)'",
+        "{22}_series": "generate_series({22}, {15}, {16}, 32, 38)"
+      }
+    }
+  ]
+}

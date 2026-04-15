@@ -1,0 +1,123 @@
+{
+  "type": "field_driven_sample_plan",
+  "description": "TR.mod",
+
+  "source_db": "placeholder.db",
+  "$comment": "lookup_table: field_rule",
+  "key_column": "英文名字",
+
+  "inspect_result_value": "符合要求",
+  "sample_strategy": "gb2828_TR",
+  "fail_result_num": "0",
+
+  "rules": [
+    {
+      "stage": "base",
+      "when": "gt({8}, 1)",
+      "then": {
+        "{44}": "'98.8%'",
+        "{24}": "'符合要求'",
+        "{45}": "'92K'",
+        "{74}": "'尺寸(mm)W'",
+        "{86}": "'D'",
+        "{98}": "'H'",
+        "{110}": "'A'",
+        "{122}": "'B'",
+        "{80}": "'空载电流(A)A'",
+        "{92}": "'B'",
+        "{104}": "'C'",
+        "{116}": "'短路阻抗(%)A'",
+        "{128}": "'B'",
+        "{140}": "'C'",
+
+        "{25}": "random_range_from_col({9})",
+        "{26}": "random_range_from_col({10})",
+        "{27}": "random_range_from_col({11})",
+        "{28}": "random_range_from_col({12})",
+        "{29}": "random_range_from_col({13})",
+
+        "{35}": "random_pair_from_base({14}, 0.1, 0.2, 0.3)",
+        "{36}": "random_pair_from_base({14}, 0.1, 0.2, 0.3)",
+        "{37}": "random_pair_from_base({14}, 0.1, 0.2, 0.3)",
+
+        "{30}": "random_range_with_suffix(0.55, 0.75, 'mA', 2)",
+        "{31}": "random_range_with_suffix(0.55, 0.75, 'mA', 2)",
+        "{32}": "random_range_with_suffix(0.55, 0.75, 'mA', 2)",
+
+        "{33}": "random_range_with_suffix(520, 580, 'MΩ', 0)",
+        "{34}": "random_range_with_suffix(520, 580, 'MΩ', 0)",
+
+        "{38}": "random_range_from_percent({18})",
+        "{39}": "random_range_from_percent({19})",
+        "{40}": "random_range_from_percent({20})",
+
+        "{41}": "random_pair_from_range_with_steps({21}, {22}, 0.1, 0.2, 0.3, 0.4)",
+        "{42}": "random_pair_from_range_with_steps({21}, {22}, 0.1, 0.2, 0.3, 0.4)",
+        "{43}": "random_pair_from_range_with_steps({21}, {22}, 0.1, 0.2, 0.3, 0.4)"
+      }
+    },
+    {
+      "stage": "series",
+      "when": "gt({8}, 1)",
+      "then": {
+        "{74}": "'尺寸(mm)W'",
+        "{86}": "'D'",
+        "{98}": "'H'",
+        "{110}": "'A'",
+        "{122}": "'B'",
+        "{80}": "'空载电流(A)A'",
+        "{92}": "'B'",
+        "{104}": "'C'",
+        "{116}": "'短路阻抗(%)A'",
+        "{128}": "'B'",
+        "{140}": "'C'",
+
+        "{75}_{79}": "fill_range_by_count({8}, {25}, 75, 79, 0)",
+        "{87}_{91}": "fill_range_by_count({8}, {26}, 87, 91, 0)",
+        "{99}_{103}": "fill_range_by_count({8}, {27}, 99, 103, 0)",
+        "{111}_{115}": "fill_range_by_count({8}, {28}, 111, 115, 0)",
+        "{123}_{128}": "fill_range_by_count({8}, {29}, 123, 128, 0)",
+        "{81}_{85}": "fill_range_by_count({8}, {35}, 81, 85, 1)",
+        "{93}_{97}": "fill_range_by_count({8}, {36}, 93, 97, 1)",
+        "{105}_{109}": "fill_range_by_count({8}, {37}, 105, 109, 1)",
+        "{117}_{121}": "fill_range_by_count({8}, {41}, 117, 121, 1)",
+        "{129}_{133}": "fill_range_by_count({8}, {42}, 129, 133, 1)",
+        "{141}_{145}": "fill_range_by_count({8}, {43}, 141, 145, 1)"
+      }
+    },
+    {
+      "stage": "base",
+      "when": "lte({8}, 1)",
+      "then": {
+        "{24}": "'符合要求'",
+        "{44}": "'98.8%'",
+        "{45}": "'92K'",
+
+        "{30}": "tr_random_range_with_suffix(0.55, 0.75, 'mA', 2)",
+        "{31}": "tr_random_range_with_suffix(0.55, 0.75, 'mA', 2)",
+        "{32}": "tr_random_range_with_suffix(0.55, 0.75, 'mA', 2)",
+
+        "{33}": "tr_random_range_with_suffix(520, 580, 'MΩ', 0)",
+        "{34}": "tr_random_range_with_suffix(520, 580, 'MΩ', 0)",
+
+        "{25}": "tr_extract_left_of_tilde({9})",
+        "{26}": "tr_extract_left_of_tilde({10})",
+        "{27}": "tr_extract_left_of_tilde({11})",
+        "{28}": "tr_extract_left_of_tilde({12})",
+        "{29}": "tr_extract_left_of_tilde({13})",
+
+        "{35}": "tr_unload_current({14})",
+        "{36}": "tr_unload_current({14})",
+        "{37}": "tr_unload_current({14})",
+
+        "{38}": "tr_extract_left_of_tilde_withpercent({18})",
+        "{39}": "tr_extract_left_of_tilde_withpercent({19})",
+        "{40}": "tr_extract_left_of_tilde_withpercent({20})",
+
+        "{41}": "single_phase_short_resistant({21}, {22})",
+        "{42}": "single_phase_short_resistant({21}, {22})",
+        "{43}": "single_phase_short_resistant({21}, {22})"
+      }
+    }
+  ]
+}

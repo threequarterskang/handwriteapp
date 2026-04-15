@@ -1,0 +1,51 @@
+{
+  "type": "field_driven_sample_plan",
+  "description": "CAP.mod",
+
+  "source_db": "placeholder.db",
+  "lookup_table": "field_rule",
+  "key_column": "英文名字",
+
+  "inspect_result_value": "符合要求",
+  "sample_strategy": "gb2828_CAP",
+  "fail_result_num": "0",
+
+  "rules": [
+    {
+      "stage": "base",
+      "when": "contains({2}, '电解')",
+      "then": {
+        "{15}": "'符合要求'",
+        "{23}": "gb2828_CAP1({8})",
+        "{31}": "'0'"
+      }
+    },
+    {
+      "stage": "base",
+      "when": "not_contains({2}, '电解')",
+      "then": {
+        "{15}": "'/'",
+        "{23}": "'/'",
+        "{31}": "'/'"
+      }
+    },
+    {
+      "stage": "base",
+      "when": "not_empty(是否需要焊接)",
+      "then": {
+        "{16}": "'符合要求'",
+        "{24}": "'5[0,1]'",
+        "{32}": "'0'"
+      }
+    },
+      {
+      "stage": "base",
+      "when": "empty(是否需要焊接)",
+      "then": {
+        "{16}": "'/'",
+        "{24}": "'/'",
+        "{32}": "'/'"
+      }
+    }
+  ]
+}
