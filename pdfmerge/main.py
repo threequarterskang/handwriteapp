@@ -11,7 +11,7 @@ from font_engine import FontEngine
 from render_engine import SVGRenderer
 
 QUERY_DB_NAME = "placeholder.db"
-DATA_DB_NAME = "../pdfmerge/total.db"
+DATA_DB_NAME = "total.db"
 PDF_DIRECTORY = "./pdf/"
 folder = Path("./config")
 svg_path = "./svgoutput"

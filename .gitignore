@@ -1,22 +1,7 @@
-# data file
-backup/
-font/font_images/
-font/bmp_output/
-font/output_txt/
-font/svg_output/
-font/scans/
-placeholder/BACKUP/
-placeholder/oldfile/
+# suffix file
+*.db
+*.xlsx
+*.xls
 
 # python environment
 venv/
-
-
-# potrace directory
-potrace/
-
-# suffix file
-*.db
-*.csv
-*.xlsx
-*.xls

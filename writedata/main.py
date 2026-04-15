@@ -6,7 +6,7 @@ sys.path.append('.')
 from core.dispatcher import DISPATCHER
 from core.loader import load_template
 
-DB1 = "../pdfmerge/total.db"
+DB1 = "total.db"
 DB2 = "placeholder.db"
 #table_name = "DIO"
 

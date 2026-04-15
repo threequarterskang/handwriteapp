@@ -152,7 +152,7 @@ def pdf_to_img_cordinate(page, x0, y0, zoom=1):
 
     return img_x, img_y
 
-def find_local_blank(binary, start_x, start_y, roi_width=60, roi_height=180):
+def find_local_blank(binary, start_x, start_y, roi_width=200, roi_height=300):
     h, w = binary.shape
     
     x_end = min(start_x + roi_width, w)
@@ -162,7 +162,7 @@ def find_local_blank(binary, start_x, start_y, roi_width=60, roi_height=180):
 
     x, y, rw, rh = largest_rectangle(roi)
 
-    return start_x+x, start_y+y, rw, rh
+    return (start_x+x)/2, (start_y+y)/2, rw/2, rh/2
 
 
 
