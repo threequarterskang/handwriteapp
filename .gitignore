@@ -2,7 +2,7 @@
 *.db
 *.xlsx
 *.xls
+.DS_Store
 
 # python environment
 venv/
-.DS_Store/
