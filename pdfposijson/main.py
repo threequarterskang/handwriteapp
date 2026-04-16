@@ -57,7 +57,7 @@ def main():
 
             x, y, w, h = find_local_blank(imgbin, imgx, imgy)
 
-            fields["blankbbox"] = [x, y, x + w, y + h]
+            fields["blankbbox"] = [x*0.35277, y*0.35277, (x + w)*0.35277, (y + h)*0.35277]
         
         save_template(fjson, cfg)
 

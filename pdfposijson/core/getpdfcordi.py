@@ -88,7 +88,7 @@ def binaryimg(img):
 
     _, binary = cv2.threshold(gray, 240, 255, cv2.THRESH_BINARY)
 
-    binary = cv2.medianBlur(binary, 3)
+    binary = cv2.medianBlur(binary, 1)
 
     kernel = np.ones((5,5), np.uint8)
 
@@ -139,7 +139,7 @@ def largest_rectangle(binary):
                     best_rect = (x, y, w_rect, h_rect)
     return best_rect
 
-def pdf_to_img_cordinate(page, x0, y0, zoom=1):
+def pdf_to_img_cordinate(page, x0, y0, zoom=2):
 #   pdf_x0 = marker["rect"][0]
 #   pdf_y1 = marker["rect"][3]      when use the left-bottom as origin ,y1 should be used.
 #   pdf_y0 = marker["rect"][1]
@@ -154,7 +154,7 @@ def pdf_to_img_cordinate(page, x0, y0, zoom=1):
 
 def find_local_blank(binary, start_x, start_y, roi_width=200, roi_height=300):
     h, w = binary.shape
-    
+
     x_end = min(start_x + roi_width, w)
     y_end = min(start_y + roi_height, h)
 
