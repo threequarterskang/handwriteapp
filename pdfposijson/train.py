@@ -60,27 +60,35 @@ def main():
 
 def largest_rectangle(binary):
     h, w = binary.shape
-    height = [0] * w
-    stack = []
+    height = 0
+    width = 0
+    loopwidth = w
+    maxheight = h
+    maxwidth = w
 
     best_rect = (0, 0, 0, 0)
-    actualwid = w
-    actualhei = h
+    
+    if binary[0][0] != 1:
+        best_rect = (0, 0, 0, 0)
 
     for i in range(h):
-        for j in range(w):
+        for j in range(loopwidth):
+            height = i
             if binary[i][j] == 1:
-                height[j] += 1
-                stack.append((i,j))
+                width += 1
             else:
-                break
-        
-    if stack[0][0] != 1:
-        best_rect = (0, 0, 0, 0)
+                loopwidth = width
+                width = 0
+                if height < loopwidth:
+                    maxheight = i
+                    maxwidth = loopwidth
+                    rect = (0, 0, maxwidth, maxheight)
+                    return rect
+
+
+    
                 
-    for i in range(len(stack)):
-        ih, iw = stack[i]
-        
+    
 
         
 

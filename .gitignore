@@ -2,7 +2,18 @@
 *.db
 *.xlsx
 *.xls
-.DS_Store
 
 # python environment
 venv/
+.DS_Store
+
+# data
+backup/
+font/font_images/
+font/scans/
+font/bmp_output/
+font/output_txt/
+font/svg_output/
+placeholder/BACKUP/
+placeholder/oldfile/
+potrace/
