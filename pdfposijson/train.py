@@ -77,22 +77,17 @@ def largest_rectangle(binary):
             if binary[i][j] == 1:
                 width += 1
             else:
+                if loopwidth > width:
+                    areanow = i*width
+                    areahis = (i-1)*loopwidth
+                    if areanow > areahis:
+                        best_rect = (0, 0, width, i)
+                    elif areanow < areahis:
+                        best_rect = (0, 0, loopwidth, i-1)
                 loopwidth = width
                 width = 0
-                if height < loopwidth:
-                    maxheight = i
-                    maxwidth = loopwidth
-                    rect = (0, 0, maxwidth, maxheight)
-                    return rect
+    return best_rect               
 
-
-    
-                
-    
-
-        
-
-                
 
 if __name__ == "__main__":
     main()
