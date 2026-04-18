@@ -1,97 +1,97 @@
 import xml.etree.ElementTree as ET
-import copy
 import re
-import numpy as np
+import os
 
 
 class RenderEngine:
     def __init__(self, svg_folder, page_height=2000):
         self.svg_folder = svg_folder
         self.page_height = page_height
-
-        # glyph cache（存“已归一化 glyph”）
         self.glyph_cache = {}
 
-    # =====================================================
-    # 🟢 1️⃣ Glyph Normalization（内置，但隔离逻辑）
-    # =====================================================
-    def normalize_glyph(self, root):
-        """
-        把 potrace SVG → pure path SVG
-        """
+    # ==========================================
+    # 🧠 解析 transform
+    # ==========================================
+    def parse_transform(self, transform_str):
+        tx, ty = 0.0, 0.0
+        sx, sy = 1.0, 1.0
 
-        new_root = ET.Element("svg", xmlns="http://www.w3.org/2000/svg")
-
-        for g in root.findall(".//{*}g"):
-            transform = g.get("transform")
-            tx, ty, sx, sy = self.parse_transform(transform)
-
-            # matrix
-            M = self.mat(tx, ty, sx, sy)
-
-            for path in g.findall(".//{*}path"):
-                new_path = copy.deepcopy(path)
-                d = path.attrib.get("d")
-
-                # ⚠️ 工业级这里应用 svgpathtools
-                # 简化版：先保留（或你后续升级）
-                new_path.attrib["d"] = d
-
-                new_root.append(new_path)
-
-        return new_root
-
-    # =====================================================
-    # 🟢 2️⃣ transform parser
-    # =====================================================
-    def parse_transform(self, t):
-        tx = ty = 0
-        sx = sy = 1
-
-        if not t:
+        if not transform_str:
             return tx, ty, sx, sy
 
-        m1 = re.search(r"translate\(([-\d.]+)[ ,]([-\d.]+)\)", t)
-        if m1:
-            tx, ty = float(m1.group(1)), float(m1.group(2))
+        t_match = re.search(r'translate\(([^)]+)\)', transform_str)
+        if t_match:
+            nums = list(map(float, t_match.group(1).replace(',', ' ').split()))
+            tx = nums[0]
+            ty = nums[1] if len(nums) > 1 else 0.0
 
-        m2 = re.search(r"scale\(([-\d.]+)(?:[ ,]([-\d.]+))?\)", t)
-        if m2:
-            sx = float(m2.group(1))
-            sy = float(m2.group(2)) if m2.group(2) else sx
+        s_match = re.search(r'scale\(([^)]+)\)', transform_str)
+        if s_match:
+            nums = list(map(float, s_match.group(1).replace(',', ' ').split()))
+            sx = nums[0]
+            sy = nums[1] if len(nums) > 1 else sx
 
         return tx, ty, sx, sy
 
-    # =====================================================
-    # 🟢 3️⃣ matrix
-    # =====================================================
-    def mat(self, tx, ty, sx, sy):
-        return np.array([
-            [sx, 0, tx],
-            [0, sy, ty],
-            [0,  0, 1]
-        ])
-
-    # =====================================================
-    # 🟢 4️⃣ load glyph（含 normalization）
-    # =====================================================
+    # ==========================================
+    # 🧠 加载 glyph（带缓存）
+    # ==========================================
     def load_glyph(self, filename):
         if filename in self.glyph_cache:
             return self.glyph_cache[filename]
 
-        path = f"{self.svg_folder}/{filename}"
+        path = os.path.join(self.svg_folder, filename)
+
         tree = ET.parse(path)
         root = tree.getroot()
 
-        # 🔥 关键：在这里做 normalize
-        normalized = self.normalize_glyph(root)
+        viewBox = root.attrib.get("viewBox")
+        if not viewBox:
+            raise ValueError(f"{filename} missing viewBox")
 
-        self.glyph_cache[filename] = normalized
-        return normalized
+        _, _, vw, vh = map(float, viewBox.split())
 
-    # =====================================================
-    # 🟢 5️⃣ render page（纯 render）
-    # =====================================================
+        g = root.find("{http://www.w3.org/2000/svg}g")
+        if g is None:
+            raise ValueError(f"{filename} missing <g>")
+
+        transform = g.attrib.get("transform", "")
+        tx, ty, sx, sy = self.parse_transform(transform)
+
+        real_w = vw * abs(sx)
+        real_h = vh * abs(sy)
+
+        glyph = {
+            "root": root,
+            "real_w": real_w,
+            "real_h": real_h,
+        }
+
+        self.glyph_cache[filename] = glyph
+        return glyph
+
+    # ==========================================
+    # 🧠 计算放置
+    # ==========================================
+    def place_glyph(self, glyph, blankbox):
+        x0, y0, x1, y1 = blankbox
+
+        box_w = x1 - x0
+        box_h = y1 - y0
+
+        gw = glyph["real_w"]
+        gh = glyph["real_h"]
+
+        scale = min(box_w / gw, box_h / gh)
+
+        draw_x = x0 + (box_w - gw * scale) / 2
+        draw_y = y0 + (box_h - gh * scale) / 2
+
+        return draw_x, draw_y, scale
+
+    # ==========================================
+    # 🧠 渲染单页
+    # ==========================================
     def render_page(self, layout_items, config, index=0):
         fields = config.get("fields")
         if not fields:
@@ -102,62 +102,53 @@ class RenderEngine:
         width = x1 - x0
         height = y1 - y0
 
-        svg = ET.Element(
-            "svg",
-            xmlns="http://www.w3.org/2000/svg",
-            width=str(width),
-            height=str(height),
-            viewBox=f"0 0 {width} {height}"
-        )
+        svg = ET.Element("svg", {
+            "xmlns": "http://www.w3.org/2000/svg",
+            "width": str(width),
+            "height": str(height),
+            "viewBox": f"0 0 {width} {height}"
+        })
 
         for item in layout_items:
             glyph = self.load_glyph(item["file"])
 
-            x = item["x"] - x0
-            y = item["y"] - y0
-            scale = item.get("scale", 1.0)
+            blankbox = fields[index]["blankbbox"]
 
-            g = ET.Element("g")
+            draw_x, draw_y, scale = self.place_glyph(glyph, blankbox)
 
-            # ✔️ render only
-            g.set("transform", f"translate({x},{y}) scale({scale})")
+            # 🔥 坐标转换：全局 → 局部
+            local_x = draw_x - x0
+            local_y = draw_y - y0
 
-            for child in glyph:
-                g.append(copy.deepcopy(child))
+            outer = ET.Element("g")
+            outer.set("transform", f"translate({local_x},{local_y}) scale({scale})")
 
-            svg.append(g)
+            for child in list(glyph["root"]):
+                outer.append(child)
+
+            svg.append(outer)
 
         return svg
 
-    # -----------------------------
-    # 4️⃣ 多页渲染
-    # -----------------------------
-    def render_multi_page(self, pages):
-        """
-        pages = [
-            [layout_item, layout_item],   # page1
-            [layout_item, layout_item],   # page2
-        ]
-        """
-
+    # ==========================================
+    # 多页
+    # ==========================================
+    def render_multi_page(self, pages, config):
         all_pages = []
 
-        for page_items in pages:
-            svg = self.render_page(page_items)
+        for i, page_items in enumerate(pages):
+            svg = self.render_page(page_items, config, i)
             all_pages.append(svg)
 
         return all_pages
 
-    # -----------------------------
-    # 5️⃣ 保存SVG
-    # -----------------------------
+    # ==========================================
+    # 保存
+    # ==========================================
     def save_svg(self, svg_root, filename):
         tree = ET.ElementTree(svg_root)
         tree.write(filename, encoding="utf-8", xml_declaration=True)
 
-    # -----------------------------
-    # 6️⃣ 批量保存多页
-    # -----------------------------
     def save_multi_page(self, svg_pages, base_name="output"):
         for i, page in enumerate(svg_pages):
             self.save_svg(page, f"{base_name}_page_{i+1}.svg")
