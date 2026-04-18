@@ -8,7 +8,7 @@ import svgutils.transform as st
 import json
 from layout_engine import LayoutEngine
 from font_engine import FontEngine
-from render_engine import SVGRenderer
+from render_engine import RenderEngine
 
 QUERY_DB_NAME = "placeholder.db"
 DATA_DB_NAME = "total.db"
@@ -17,10 +17,12 @@ folder = Path("./config")
 svg_path = "./svgoutput"
 
 def find_field_index_by_key(fields, key_name, value):
+    index = 0
     for i , field in enumerate(fields):
-        if field.get(key_name) == value:
-            return i
-    return -1
+        if str(field.get(key_name)) == str(value):
+            index = i
+            break
+    return index
 
 def main():
     with open("svgfong.json", "r", encoding="utf-8") as f:
@@ -77,15 +79,15 @@ def main():
                 text = row[column_name]
                 font_engine = FontEngine(font_map)
                 layout_engine = LayoutEngine(font_engine)
-                svg_engine = SVGRenderer(layout_engine)
+                svg_engine = RenderEngine(layout_engine)
                 svg_engine.svg_folder = svg_path
 
                 if text is None:
                     print(f'{column_name} is none..')
                 else:
-                    index = find_field_index_by_key(fields, f"key", idx)
+                    index = find_field_index_by_key(fields, "key", idx)
                     result = layout_engine.layout(text, index, template)
-                    svgrender = svg_engine.render_page(result, index, template)   
+                    svgrender = svg_engine.render_page(result, template, index)   
                     render = svg_engine.save_svg(svgrender, f'output{tbn}{idx}.svg')
 
                     print(f'{tbn}-{idx}')

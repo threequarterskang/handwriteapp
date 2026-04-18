@@ -1,151 +1,116 @@
-import random
 import math
 from font_engine import FontEngine
 
-# =========================
-# LayoutEngine
-# =========================
 
 class LayoutEngine:
     def __init__(self, font_engine):
         self.font_engine = font_engine
 
+    # -----------------------------
+    # ✔️ main layout
+    # -----------------------------
     def layout(self, text, index, config):
         fields = config.get("fields")
         if not fields:
-            raise ValueError("missing fields!!")
+            raise ValueError("missing fields")
 
-        x0 = fields[index]["blankbbox"][0]
-        y0 = fields[index]["blankbbox"][1]
-        x1 = fields[index]["blankbbox"][2]
-        y1 = fields[index]["blankbbox"][3]
+        x0, y0, x1, y1 = fields[index]["blankbbox"]
 
         max_width = x1 - x0
         max_height = y1 - y0
 
-        baseline = self.font_engine.meta.get("baseline", 0)
+        baseline = self.font_engine.meta.get("baseline", 100)
 
-        print(baseline)
-
-        placed = []
-        result = []
-
-        width = 0 
+        # -----------------------------
+        # 1️⃣ collect metrics
+        # -----------------------------
+        advances = []
         count = 0
+
         for ch in text:
-            glyph = self.font_engine.get_glyph(ch)
-
-            if not glyph:
+            g = self.font_engine.get_glyph(ch)
+            if not g:
                 continue
-            
-            w = glyph["advance"]
 
-            width += w
+            advances.append(g["advance"])
             count += 1
 
-        avg_advance = width / count * 0.4
-        blankwidth = x1 - x0
-        blankheight = y1 -y0
+        avg_advance = sum(advances) / max(1, len(advances))
 
+        # -----------------------------
+        # 2️⃣ compute global scale
+        # -----------------------------
         scale = self.compute_scale(
-            count, blankwidth, blankheight, avg_advance, baseline
-            )
-        
+            len(text),
+            max_width,
+            max_height,
+            avg_advance,
+            baseline
+        )
+
+        # -----------------------------
+        # 3️⃣ layout cursor (IMPORTANT FIX)
+        # -----------------------------
+        x = x0
+        y = y0
+        line_height = baseline * scale * 1.2
+
+        result = []
+        placed_boxes = []
+
+        # -----------------------------
+        # 4️⃣ layout loop
+        # -----------------------------
         for ch in text:
             glyph = self.font_engine.get_glyph(ch)
-
             if not glyph:
                 continue
 
-            x = x0
-            y = y0
-            line_height = baseline * scale * 1.2
-            bbox = glyph["bbox"]
-            w = bbox["width"] * scale
-            h = bbox["height"] * scale
+            advance = glyph["advance"] * scale
 
-            # Auto line break
-            if x + w > max_width:
+            # ✔️ line break (correct logic)
+            if x + advance > x0 + max_width:
                 x = x0
-                y0 += line_height
+                y += line_height  # ✔️ FIX: NOT y0
 
-            # Handwriting jitter
-            dx = random.uniform(-3, 3)
-            dy = random.uniform(-2, 2)
-
-            # Baseline alignment (CORE)
-            draw_y = y - (baseline - bbox["y0"]) * scale + dy
+            # -----------------------------
+            # position (NO jitter in core)
+            # -----------------------------
+            draw_x = x
+            draw_y = y - (baseline * scale)
 
             box = {
-                "x0": x + dx,
+                "x0": draw_x,
                 "y0": draw_y,
-                "x1": x + dx + w,
-                "y1": draw_y + h
+                "x1": draw_x + advance,
+                "y1": draw_y + line_height
             }
 
-            # Collision resolve
-            box = self.resolve_collision(box, placed)
+            placed_boxes.append(box)
 
             result.append({
                 "char": ch,
                 "file": glyph["file"],
-                "x": box["x0"],
-                "y": box["y0"],
+                "x": draw_x,
+                "y": draw_y,
                 "scale": scale
             })
 
-            placed.append(box)
+            # advance cursor
+            x += advance
 
-            # Advance with slight randomness
-            x += glyph["advance"] * scale * random.uniform(0.98, 1.05)
         return result
-    
-    def compute_scale(self, text_len, blank_w, blank_h, avg_advance, baseline):
-        scale = blank_h / baseline
 
-        for _ in range(20):
-            char_w = avg_advance * scale
+    # -----------------------------
+    # ✔️ scale computation (clean version)
+    # -----------------------------
+    def compute_scale(self, text_len, max_w, max_h, avg_advance, baseline):
+        chars_per_line = max(1, int(max_w / avg_advance))
+        lines = math.ceil(text_len / chars_per_line)
 
-            chars_per_line = max(1, int(blank_w/char_w))
+        scale_w = max_w / (avg_advance * chars_per_line)
+        scale_h = max_h / (baseline * lines)
 
-            lines = math.ceil(text_len / chars_per_line)
+        scale = min(scale_w, scale_h)
 
-            total_h = lines * baseline * scale
-            
-            if total_h > blank_h:
-                scale *= 0.95
-            else:
-                break
-        return scale
-
-
-    def resolve_collision(self, box, placed):
-        for _ in range(8):
-            overlap_found = False
-
-            for p in placed:
-                if self.is_overlap(box, p):
-                    overlap_found = True
-                    break
-
-            if not overlap_found:
-                return box
-
-            # shift slightly
-            shift_x = random.uniform(2, 5)
-            shift_y = random.uniform(-2, 2)
-
-            box["x0"] += shift_x
-            box["x1"] += shift_x
-            box["y0"] += shift_y
-            box["y1"] += shift_y
-
-        return box
-
-    def is_overlap(self, a, b):
-        return not (
-            a["x1"] < b["x0"] or
-            a["x0"] > b["x1"] or
-            a["y1"] < b["y0"] or
-            a["y0"] > b["y1"]
-        )
+        return scale * 0.95

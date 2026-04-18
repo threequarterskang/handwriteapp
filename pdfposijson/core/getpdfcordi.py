@@ -139,6 +139,37 @@ def largest_rectangle1(binary):
                     best_rect = (x, y, w_rect, h_rect)
     return best_rect
 
+def largest_rectangle_from_topleft(binary):
+    h, w = binary.shape
+    
+    max_area = 0
+    best_rect = (0, 0, 0, 0)
+
+    max_width = w  # 当前允许的最大宽度
+
+    for i in range(h):
+        # 找这一行从0开始连续的1的宽度
+        row_width = 0
+        for j in range(max_width):
+            if binary[i][j] == 1:
+                row_width += 1
+            else:
+                break
+
+        # 更新最大宽度（关键！保证是矩形）
+        max_width = min(max_width, row_width)
+
+        if max_width == 0:
+            break
+
+        area = max_width * (i + 1)
+
+        if area > max_area:
+            max_area = area
+            best_rect = (0, 0, max_width, i + 1)
+
+    return best_rect
+
 def largest_rectangle(binary):
     h, w = binary.shape
     height = 0
@@ -195,7 +226,7 @@ def find_local_blank(binary, start_x, start_y, roi_width=200, roi_height=300):
 
     roi = binary[start_y:y_end, start_x:x_end]
 
-    x, y, rw, rh = largest_rectangle(roi)
+    x, y, rw, rh = largest_rectangle_from_topleft(roi)
 
     return (start_x+x)/2, (start_y+y)/2, rw/2, rh/2
 
