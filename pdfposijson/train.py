@@ -40,7 +40,7 @@ def binaryimg(img):
 def main():
 
 
-    doc = fitz.open(f"{PDF_DIRECTORY}6.1 TR.pdf")
+    doc = fitz.open(f"{PDF_DIRECTORY}6.54 PP.pdf")
 
     page = doc[0]
 
@@ -52,6 +52,8 @@ def main():
     cv2.imwrite("pdftoimg.png", img)
 
     imgbin = binaryimg(img)
+    h, w = imgbin.shape
+    print(h, w)
 
     cv2.imshow("binaryimg", imgbin)
 

@@ -101,43 +101,6 @@ def binaryimg(img):
 ##################################################
 # 最大矩形
 ##################################################
-def largest_rectangle1(binary): 
-    h, w = binary.shape
-    heights = [0] * h
-
-    max_area = 0
-    best_rect = (0, 0, 0 ,0)
-
-    for i in range(h):
-        for j in range(w):
-            if binary[i][j] == 1:
-                heights[j] += 1
-            else:
-                heights[j] = 0
-        
-        stack = []
-        j = 0
-
-        while j <= w:
-            cur = heights[j] if j < w else 0
-
-            if not stack or cur >= heights[stack[-1]]:
-                stack.append(j)
-                j += 1
-            else:
-                top = stack.pop()
-                width = j if not stack else j - stack[-1] - 1
-                area = heights[top] * width
-
-                if area > max_area:
-                    max_area = area
-                    h_rect = heights[top]
-                    w_rect = width
-
-                    x = stack[-1] + 1 if stack else 0
-                    y = i - h_rect + 1
-                    best_rect = (x, y, w_rect, h_rect)
-    return best_rect
 
 def largest_rectangle_from_topleft(binary):
     h, w = binary.shape
@@ -168,41 +131,6 @@ def largest_rectangle_from_topleft(binary):
             max_area = area
             best_rect = (0, 0, max_width, i + 1)
 
-    return best_rect
-
-def largest_rectangle(binary):
-    h, w = binary.shape
-    height = 0
-    width = 0
-    loopwidth = w
-
-    best_rect = (0, 0, 0, 0)
-    
-    if binary[0][0] != 1:
-        best_rect = (0, 0, 0, 0)
-
-    break_flag = False
-
-    for i in range(h):
-        for j in range(loopwidth):
-            if binary[i][j] == 1:
-                width += 1
-            else:
-                if loopwidth != w and loopwidth > width:
-                    areanow = i*width
-                    areahis = (i-1)*loopwidth
-                    if areanow > areahis:
-                        best_rect = (0, 0, width, i)
-                        break_flag = True
-                        break
-                    elif areanow < areahis:
-                        best_rect = (0, 0, loopwidth, i-1)
-                        break_flag = True
-                        break
-                loopwidth = width
-                width = 0
-        if break_flag:
-            break
     return best_rect
 
 def pdf_to_img_cordinate(page, x0, y0, zoom=2):

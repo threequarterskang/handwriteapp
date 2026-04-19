@@ -23,7 +23,28 @@ def find_field_index_by_key(fields, key_name, value):
             index = i
             break
     return index
+import PyPDF2
+import cairosvg
 
+# 转换 SVG 为 PDF
+def convert_svg_to_pdf(svg_file, pdf_file):
+    cairosvg.svg2pdf(url=svg_file, write_to=pdf_file)
+
+# 合并 PDF 文件
+def merge_pdfs(pdf_list, output_pdf):
+    pdf_writer = PyPDF2.PdfWriter()
+    
+    # 将所有 PDF 添加到 pdf_writer
+    for pdf in pdf_list:
+        pdf_reader = PyPDF2.PdfReader(pdf)
+        for page_num in range(len(pdf_reader.pages)):
+            page = pdf_reader.pages[page_num]
+            pdf_writer.add_page(page)
+    
+    # 保存合并后的 PDF
+    with open(output_pdf, 'wb') as output:
+        pdf_writer.write(output)
+        
 def main():
     with open("svgfong.json", "r", encoding="utf-8") as f:
         font_map = json.load(f)
@@ -74,6 +95,7 @@ def main():
             fields = template.get("fields")
             row = cur1.fetchone()
             max_column = int(mapping[tbn])
+            result = []
             for idx in range(1,max_column+1):
                 column_name = f"{{{idx}}}"
                 text = row[column_name]
@@ -81,18 +103,14 @@ def main():
                 layout_engine = LayoutEngine(font_engine)
                 svg_engine = RenderEngine(layout_engine)
                 svg_engine.svg_folder = svg_path
-
+                print(idx)
                 if text is None:
                     print(f'{column_name} is none..')
                 else:
                     index = find_field_index_by_key(fields, "key", idx)
-                    result = layout_engine.layout(text, index, template)
-                    svgrender = svg_engine.render_page(result, template, index)   
-                    render = svg_engine.save_svg(svgrender, f'output{tbn}{idx}.svg')
-
-                    print(f'{tbn}-{idx}')
-                    for row1 in result:
-                        print(row1)
+                    result.append(layout_engine.layout(text, index, template))
+            svgrender = svg_engine.render_page(result)   
+            render = svg_engine.save_svg(svgrender, f'output{tbn}{idx}.svg')
                              
     
     conn1.close()
