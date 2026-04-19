@@ -85,7 +85,7 @@ class LayoutEngine:
         scale_w = max_w / (chars_per_line * avg_advance * 0.00009)
         scale_h = max_h / (lines * line_height)
         print(f'({scale_w}----{scale_h})')
-        scale = min(scale_w, scale_h) * 1.5
+        scale = min(scale_w, scale_h) * 2
         print(f'({text}---{scale})')
         # ---------------------------------
         # 4️⃣ layout loop

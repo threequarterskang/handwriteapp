@@ -5,7 +5,7 @@ from reportlab.pdfgen import canvas
 from PyPDF2 import PdfReader, PdfWriter
 import cairosvg
 import tempfile
-import cairo
+from io import BytesIO
 
 
 # 将 SVG 转换为 PNG 图像
